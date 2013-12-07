@@ -1,0 +1,96 @@
+on early-init
+    start ueventd
+    start healthd
+
+on init
+    export PATH /sbin
+    export LD_LIBRARY_PATH .:/sbin
+    export ANDROID_ROOT /system
+    export ANDROID_DATA /data
+    export EXTERNAL_STORAGE /sdcard
+
+    mkdir /boot
+    mkdir /recovery
+    mkdir /system
+    mkdir /data
+    mkdir /cache
+    mount /tmp /tmp tmpfs
+
+    chown root shell /tmp
+    chmod 0775 /tmp
+
+    # USB initialization
+    write /sys/class/android_usb/android0/iSerial $ro.serialno
+    write /sys/class/android_usb/android0/f_rndis/manufacturer NutShell
+    write /sys/class/android_usb/android0/f_rndis/vendorID 230B
+    write /sys/class/android_usb/android0/f_rndis/wceis 0
+    write /sys/class/android_usb/android0/f_acm/instances 1
+
+    write /sys/class/android_usb/android0/idVendor 230B
+    write /sys/class/android_usb/android0/idProduct 0100
+    write /sys/class/android_usb/android0/bDeviceClass 0
+    write /sys/class/android_usb/android0/iManufacturer NutShell
+    write /sys/class/android_usb/android0/iProduct Bambook Phone
+
+on post-fs-data
+
+    chown system system /sys/class/android_usb/android0/f_mass_storage/lun/file
+    chmod 0660 /sys/class/android_usb/android0/f_mass_storage/lun/file
+
+# Bambook configuration
+on property:sys.usb.config=mass_storage,acm,adb
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 230B
+    write /sys/class/android_usb/android0/idProduct 0100
+    write /sys/class/android_usb/android0/bDeviceClass 0
+    write /sys/class/android_usb/android0/functions mass_storage,acm,adb
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
+    setprop sys.usb.state ${sys.usb.config}
+
+on early-boot
+
+    # USB initialization
+    write /sys/class/android_usb/android0/idVendor 230B
+    write /sys/class/android_usb/android0/idProduct 0100
+    write /sys/class/android_usb/android0/bDeviceClass 0
+    write /sys/class/android_usb/android0/iManufacturer NutShell
+    write /sys/class/android_usb/android0/iProduct Bambook Phone
+    write /sys/class/android_usb/android0/functions mass_storage,acm,adb
+    write /sys/class/android_usb/android0/enable 1
+    write /sys/devices/platform/ab8500-i2c.0/ab8500-usb.0/boot_time_device 1
+    write /sys/devices/platform/ab8505-i2c.0/ab8500-usb.0/boot_time_device 1
+
+on boot
+
+    ifup lo
+    hostname localhost
+    domainname localdomain
+
+    class_start default
+
+on property:sys.powerctl=*
+   powerctl ${sys.powerctl}
+
+service ueventd /sbin/ueventd
+    critical
+
+service healthd /sbin/healthd -n
+    critical
+
+service recovery /sbin/recovery
+
+service adbd /sbin/adbd recovery
+    disabled
+    socket adbd stream 660 system system
+
+on property:persist.service.adb.enable=1
+    start adbd
+
+on property:persist.service.adb.enable=0
+    stop adbd
+
+service adbd /sbin/adbd
+    class core
+    disabled
+
