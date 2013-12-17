@@ -30,8 +30,13 @@
 
 #include <pixelflinger/pixelflinger.h>
 
+//#ifdef BOARD_USE_CUSTOM_RECOVERY_FONT
+//#include BOARD_USE_CUSTOM_RECOVERY_FONT
+//const unsigned cw_en=10;
+//#else
 #include "font_10x18_cn.h"
 const unsigned cw_en=10;
+//#endif
 
 #include "minui.h"
 
@@ -360,6 +365,7 @@ static void gr_init_font(void)
     gr_font->ascent = font.cheight - 2;
 }
 
+//int gr_init(void)
 int gr_init_real(void)
 {
     gglInit(&gr_context);
@@ -409,7 +415,6 @@ int gr_init(void)
     gr_init_real();
     return 0;
 }
-
 void gr_exit(void)
 {
     close(gr_fb_fd);

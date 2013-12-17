@@ -46,8 +46,8 @@ loglevel 3
     mkdir /acct
     mount cgroup none /acct cpuacct
     mkdir /acct/uid
-    mkdir /modemfs 0771 system system
-    mkdir /system 0775 system system
+
+    mkdir /system
     mkdir /data 0771 system system
     mkdir /cache 0771 system cache
     mkdir /config 0500 root root
@@ -413,7 +413,7 @@ service ril-daemon /system/bin/rild
     socket rild stream 660 root radio
     socket rild-debug stream 660 radio system
     user root
-    group radio cache inet misc audio sdcard_r sdcard_rw log
+    group radio cache inet misc audio sdcard_r sdcard_rw log dbus_access
 
 service surfaceflinger /system/bin/surfaceflinger
     class main
@@ -439,6 +439,7 @@ service media /system/bin/mediaserver
     user media
     group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc
     ioprio rt 4
+
 service bootanim /system/bin/bootanimation
     class main
     user graphics
@@ -449,7 +450,7 @@ service bootanim /system/bin/bootanimation
 service dbus /system/bin/dbus-daemon --system --nofork
     class main
     socket dbus stream 660 bluetooth bluetooth
-    socket dbus_ste stream 660 bluetooth dbus_access
+    socket dbus_ste stream 666 bluetooth dbus_access
     user bluetooth
     group bluetooth net_bt_admin dbus_access
 
@@ -505,5 +506,4 @@ service mdnsd /system/bin/mdnsd
     socket mdnsd stream 0660 mdnsr inet
     disabled
     oneshot
-
 

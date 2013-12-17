@@ -3,11 +3,7 @@ USE_CAMERA_STUB := true
 # inherit from the proprietary version
 -include vendor/bambook/u8500/BoardConfigVendor.mk
 
-TARGET_SPECIFIC_HEADER_PATH := \
-    device/bambook/u8500/include \
-    device/bambook/u8500/hardware/wlan/build \
-    device/bambook/u8500/hardware/wlan/ste_pcsc
-
+TARGET_SPECIFIC_HEADER_PATH := device/bambook/u8500/include
 
 TARGET_OTA_ASSERT_DEVICE := u8500
 BOARD_CUSTOM_BOOTIMG_MK := device/bambook/u8500/releasetools/custombootimg.mk
@@ -24,10 +20,10 @@ BOARD_USES_STE_HARDWARE := true
 
 # Architecture
 TARGET_ARCH := arm
+TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a9
-TARGET_ARCH_VARIANT := armv7-a-neon
 ARCH_ARM_HAVE_TLS_REGISTER := true
 TARGET_CPU_SMP := true
 
@@ -35,12 +31,22 @@ TARGET_CPU_SMP := true
 TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
 TARGET_GLOBAL_CPPFLAGS += -mfpu=neon -mfloat-abi=softfp
 
-# Kernel
+## Kernel
+#LOCAL_PATH := device/bambook/u8500
+#ifeq ($(TARGET_PREBUILT_KERNEL),)
+#	LOCAL_KERNEL := $(LOCAL_PATH)/kernel
+#else
+#	LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
+#endif
+
+#PRODUCT_COPY_FILES += \
+#    $(LOCAL_KERNEL):kernel
+
+#TARGET_PREBUILT_KERNEL := device/bambook/u8500/kernel
 TARGET_KERNEL_CUSTOM_TOOLCHAIN := arm-eabi-4.4.3
 TARGET_KERNEL_SOURCE := kernel/bambook/u8500
-TARGET_KERNEL_CONFIG := bambook_u8500_defconfig
-BOARD_KERNEL_CMDLINE := root=/dev/ram0 init=init rw console=ttyAMA2,115200n8 mem=256M initrd=0x800000,72M
-#BOARD_MKBOOTIMG_ARGS :=  --ramdiskaddr 0x02000000
+TARGET_KERNEL_CONFIG := u8500_defconfig
+BOARD_KERNEL_CMDLINE := 
 BOARD_FORCE_RAMDISK_ADDRESS := 0x02000000
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 2048
@@ -56,7 +62,7 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 # Audio
 BOARD_USES_GENERIC_AUDIO := false
 BOARD_USES_ALSA_AUDIO := true
-#COMMON_GLOBAL_CFLAGS += -DSTE_AUDIO
+COMMON_GLOBAL_CFLAGS += -DSTE_AUDIO
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
@@ -64,13 +70,10 @@ BOARD_HAVE_BLUETOOTH_STE := true
 COMMON_GLOBAL_CFLAGS += -DSTE_BT
 
 # WIFI
-WPA_SUPPLICANT_VERSION := VER_0_8_X
+WPA_SUPPLICANT_VERSION := VER_0_8_X_STE
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 BOARD_HOSTAPD_DRIVER := NL80211
 BOARD_TI_SOFTAP := true
-TARGET_USE_ST_ERICSSON_KERNEL := true
-WLAN_SET_PLATFORM := u8500
-
 
 # Graphics
 USE_OPENGL_RENDERER := true
@@ -79,35 +82,22 @@ COMMON_GLOBAL_CFLAGS += -DSTE_HARDWARE
 
 # Lights
 TARGET_PROVIDES_LIBLIGHTS := false
-#COMMON_GLOBAL_CFLAGS += -DNEW_NOTIFICATION -DSECOND_NOTIFICATION
 
 # RECOVERY
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_HAS_NO_SELECT_BUTTON := true
 BOARD_USES_MMCUTILS := true
-#BOARD_USE_CUSTOM_RECOVERY_FONT := \"font_10x18.h\"
-
-
-# CWM
-#BOARD_CUSTOM_GRAPHICS := ../../../device/bambook/u8500/recovery/graphics_en.c
-BOARD_CUSTOM_GRAPHICS := ../../../device/bambook/u8500/recovery/graphics_cn.c
-TARGET_RECOVERY_INITRC := device/bambook/u8500/recovery/recovery.rc
-#BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/bambook/u8500/recovery/recovery-keys.c
-
- # TWRP
-#TARGET_RECOVERY_INITRC := device/bambook/u8500/recovery/twrprecovery.rc
-#TW_BOARD_CUSTOM_GRAPHICS := ../../../device/bambook/u8500/recovery/graphics_twrp_en.c
-#TW_BOARD_CUSTOM_GRAPHICS := ../../../device/bambook/u8500/recovery/graphics_twrp_cn.c
-#DEVICE_RESOLUTION := 540x960
-#TW_EXTERNAL_STORAGE_PATH := "/sdcard"
-#TW_EXTERNAL_STORAGE_MOUNT_POINT := "sdcard"
-
-# USB
-BOARD_UMS_LUNFILE := "/sys/devices/virtual/android_usb/android0/f_mass_storage/lun/file"
-TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/virtual/android_usb/android0/f_mass_storage/lun%d/file"
-
 BOARD_SDCARD_INTERNAL_DEVICE := /dev/block/mmcblk0p7
 
+# CWM RECOVERY
+BOARD_CUSTOM_GRAPHICS := ../../../device/bambook/u8500/recovery/graphics_cn.c
+#BOARD_CUSTOM_GRAPHICS := ../../../device/bambook/u8500/recovery/graphics_en.c
+#BOARD_USE_CUSTOM_RECOVERY_FONT := \"font_10x18.h\"
+TARGET_RECOVERY_INITRC := device/bambook/u8500/recovery/recovery.rc
+
+# USB
+BOARD_UMS_LUNFILE := "/sys/devices/soc0/musb-ux500.0/musb-hdrc/gadget/lun%d/file"
+TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/soc0/musb-ux500.0/musb-hdrc/gadget/lun%d/file"
 # Debug mode
 ADDITIONAL_DEFAULT_PROPERTIES += ro.debuggable=1
 ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
